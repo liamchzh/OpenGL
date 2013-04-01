@@ -6,9 +6,9 @@ static double rotatex=0,rotatey=0,rotatez=0;
 static double movex=0,movey=0,movez=0;
 static double zoomx=1.0,zoomy=1.0,zoomz=1.0;
 
-char posix[6]={"+0.00"}, posiy[5]={"+0.00"};
-char anglex[6]={"+0.00"},angley[6]={"+0.00"}, anglez[6]={"+0.00"};
-//char zoom = "1";
+char posix[6]={"+0.00"}, posiy[6]={"+0.00"};
+char anglex[6]={"000.0"},angley[6]={"000.0"}, anglez[6]={"000.0"};
+char zx[4]={"0.0"}, zy[4]={"0.0"}, zz[4]={"0.0"};
 
 void axis(double length)
 {
@@ -21,11 +21,11 @@ void axis(double length)
 	glPopMatrix();
 }
 
-void transform(char *arr, float n)
+void posi_trans(char *arr, float n)
 {
     int num;
     num = n * 100;
-    if(n<0) 
+    if(num<0) 
     {
         arr[0] = '-';
         num = abs(num);
@@ -37,10 +37,37 @@ void transform(char *arr, float n)
     arr[1] = num/100 + '0';
     arr[2] = '.';
     arr[3] = (num%100)/10 + '0';
-    arr[4] = (num%10);
-    arr[5] = '\0';
+    arr[4] = (num%10) + '0';
 }
 
+void angle_trans(char *arr, float n)
+{
+    int num;
+    num = n * 10;
+    if(num > 3600)
+    {
+        num = num % 3600;
+    }
+    arr[0] = num/1000 + '0';
+    arr[1] = (num%1000)/100 + '0';
+    arr[2] = (num%100)/10 + '0';
+    arr[3] = '.';
+    arr[4] = num%10 + '0';
+}
+
+void zoom_trans(char *arr, float n)
+{
+    int num;
+    num = n * 10;
+    if(num<0) 
+    {
+        num = abs(num);
+    }
+
+    arr[0] = (num/10) + '0';
+    arr[2] = (num%10) + '0';
+
+}
 void myInit(void)
 {
 	glClearColor(1.0,1.0,1.0,0.0);
@@ -51,7 +78,7 @@ void myInit(void)
 	gluOrtho2D(0.0,640.0,0.0,480.0);
 }
 
-void displayCude(void)
+void display(void)
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -62,7 +89,8 @@ void displayCude(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 	glColor3d(0,0,1);
 	glPushMatrix();
-
+    
+    //世界坐标系
 	glBegin(GL_LINES);
         glVertex3d(0,0,0);
         glVertex3d(0,0,3);
@@ -72,37 +100,90 @@ void displayCude(void)
         glVertex3d(3,0,0);
     glEnd();
 
-    transform(posix, movex);
-    transform(posiy, movey);
-    transform(anglex, rotatex);
-    transform(angley, rotatey);
-    transform(anglez, rotatez);
+    glutWireTetrahedron();//正四面体
+
+    posi_trans(posix, movex);
+    posi_trans(posiy, movey);
+    angle_trans(anglex, rotatex);
+    angle_trans(angley, rotatey);
+    angle_trans(anglez, rotatez);
+    zoom_trans(zx, zoomx);
+    zoom_trans(zy, zoomy);
+    zoom_trans(zz, zoomz);
 
     int i = 0;
-    glRasterPos2f(2,3);
+    glRasterPos2f(1.5,2.8);
+    char position[10] = {"Position:"};
+    char rotate[8] = {"Rotate:"};
+    char z[6] = {"Zoom:"};
+
+    //显示坐标
+    for(i = 0; i < 10; i++)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,position[i]);
+    }
     for(i=0; i<5; i++)
     {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,posix[i]);
     }
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,' ');
     for(i=0; i<5; i++)
     {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,posiy[i]);
     }
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,' ');
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,'+');
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,'0');
 
-    glRasterPos2f(2,2.5);
+
+    //显示旋转角度
+    glRasterPos2f(1.5,2.5);
+    for(i = 0; i < 8; i++)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,rotate[i]);
+    }
     for(i=0; i<5; i++)
     {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,anglex[i]);
     }
+
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,' ');
     for(i=0; i<5; i++)
     {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,angley[i]);
     }
+
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,' ');
     for(i=0; i<5; i++)
     {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,anglez[i]);
     }
     
+    //放大倍数
+    glRasterPos2f(1.5,2.2);
+    //显示'Zoom:'
+    for(i = 0; i < 6; i++)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,z[i]);
+    }
+    //显示具体参数
+    for(i=0; i<4; i++)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,zx[i]);
+    }
+
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,' ');
+    for(i=0; i<4; i++)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,zy[i]);
+    }
+
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,' ');
+    for(i=0; i<4; i++)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,zz[i]);
+    }
+
     glTranslatef (movex,0.0, 0.0);
     glTranslatef (0.0, movey, 0.0);
 
@@ -112,7 +193,7 @@ void displayCude(void)
 
 	glScalef(zoomx,zoomy,zoomz);
 
-    
+    //显示物体坐标系
 	glBegin(GL_LINES);
         glVertex3d(0,0,0);
         glVertex3d(0,0,1);
@@ -123,7 +204,6 @@ void displayCude(void)
     glEnd();
 
 	glutWireCube(0.5);//正八面体
-    glutWireTetrahedron();//正四面体
 	
     glPopMatrix(); 
 	glFlush();
@@ -212,11 +292,27 @@ void myKeyboard(unsigned char key,GLint x,GLint y)
 		glutPostRedisplay();
 		glPopMatrix();
 		break;
-	
+    case 'i':
+        glPushMatrix();
+        zoomx+=0.2;
+        zoomy+=0.2;
+        zoomz+=0.2;
+        glPopMatrix();
+        glutPostRedisplay();
+        break;
+    case 'o':
+        glPushMatrix();
+        zoomx-=0.2;
+        zoomy-=0.2;
+        zoomz-=0.2;
+        glPopMatrix();
+        glutPostRedisplay();
+        break;
 	}
 
 }
-
+//使用鼠标放大缩小，改为使用键盘
+/*
 void myMouse(int button,int state,int x,int y)
 {
 	if(state==GLUT_DOWN)
@@ -242,7 +338,7 @@ void myMouse(int button,int state,int x,int y)
 	}
 
 }
-
+*/
 
 int main(int argc, char* argv[])
 {
@@ -250,11 +346,11 @@ int main(int argc, char* argv[])
 	glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB);
 	glutInitWindowSize(800,600);
 	glutInitWindowPosition(100,100);
-	glutCreateWindow("鼠标左键放大 右键缩小");
-	glutDisplayFunc(displayCude);
+	glutCreateWindow("exp1");
+	glutDisplayFunc(display);
 	glutKeyboardFunc(myKeyboard);
 	glutSpecialFunc(specialKey);
-	glutMouseFunc(myMouse);
+	//glutMouseFunc(myMouse);
 	myInit();
 	glViewport(0,0,640,480);
 	glutMainLoop();
