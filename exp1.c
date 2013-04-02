@@ -21,6 +21,7 @@ void axis(double length)
 	glPopMatrix();
 }
 
+//计算位置
 void posi_trans(char *arr, float n)
 {
     int num;
@@ -40,6 +41,7 @@ void posi_trans(char *arr, float n)
     arr[4] = (num%10) + '0';
 }
 
+//计算角度
 void angle_trans(char *arr, float n)
 {
     int num;
@@ -55,6 +57,7 @@ void angle_trans(char *arr, float n)
     arr[4] = num%10 + '0';
 }
 
+//计算缩放
 void zoom_trans(char *arr, float n)
 {
     int num;
@@ -68,6 +71,7 @@ void zoom_trans(char *arr, float n)
     arr[2] = (num%10) + '0';
 
 }
+
 void myInit(void)
 {
 	glClearColor(1.0,1.0,1.0,0.0);
@@ -87,7 +91,7 @@ void display(void)
 	glLoadIdentity();
 	gluLookAt(2.0,2.0,2.0,0.7,0.7,0.0,0.0,1.0,0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glColor3d(0,0,1);
+	glColor3d(0,0,0);
 	glPushMatrix();
     
     //世界坐标系
@@ -99,6 +103,13 @@ void display(void)
         glVertex3d(0,0,0);
         glVertex3d(3,0,0);
     glEnd();
+
+    glRasterPos2f(3.0,0.0);
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,'X');
+    glRasterPos2f(0.0,2.0);
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,'Y');
+    glRasterPos2f(-2.0,-2.0);
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,'Z');
 
     glutWireTetrahedron();//正四面体
 
@@ -205,45 +216,17 @@ void display(void)
 
 	glutWireCube(0.5);//正八面体
 	
+    glRasterPos2f(1.0,0.0);
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,'x');
+    glRasterPos2f(0.0,1.0);
+    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24,'y');
+
     glPopMatrix(); 
 	glFlush();
 
 
 }
 
-void specialKey(GLint key,GLint x,GLint y)
-{
-	switch(key)
-	{
-	case GLUT_KEY_UP:
-		glPushMatrix(); 
-		movey+=0.1;
-		glPopMatrix();
-		glutPostRedisplay();
-		break;
-	case GLUT_KEY_DOWN:
-		glPushMatrix(); 
-		movey+=-0.1;
-		glPopMatrix();
-		glutPostRedisplay();
-		break;
-	case GLUT_KEY_LEFT:
-		glPushMatrix(); 
-		movex+=-0.1;
-		movey+=-0.03;
-		glPopMatrix();	
-		glutPostRedisplay();
-		break;
-	case GLUT_KEY_RIGHT:
-		glPushMatrix(); 
-		movex+=0.1;
-		movey+=0.03;
-		glPopMatrix();
-		glutPostRedisplay();
-		break;
-	}
-
-}
 void myKeyboard(unsigned char key,GLint x,GLint y)
 {
 	switch(key)
@@ -349,8 +332,7 @@ int main(int argc, char* argv[])
 	glutCreateWindow("exp1");
 	glutDisplayFunc(display);
 	glutKeyboardFunc(myKeyboard);
-	glutSpecialFunc(specialKey);
-	//glutMouseFunc(myMouse);
+	//glutMouseFunc(myMouse);//使用鼠标放大缩小，改为使用键盘
 	myInit();
 	glViewport(0,0,640,480);
 	glutMainLoop();
